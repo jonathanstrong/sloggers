@@ -1,7 +1,7 @@
 //! File logger.
 use std::fmt::Debug;
 use std::fs::{File, OpenOptions};
-use std::io::{self, Write};
+use std::io::{self, Write, LineWriter};
 use std::path::{Path, PathBuf};
 use slog::{Drain, FnValue, Logger};
 use slog_async::Async;
@@ -117,7 +117,7 @@ impl Build for FileLoggerBuilder {
 #[derive(Debug)]
 struct FileAppender {
     path: PathBuf,
-    file: Option<File>,
+    file: Option<LineWriter<File>>,
     truncate: bool,
 }
 impl Clone for FileAppender {
@@ -148,6 +148,7 @@ impl FileAppender {
                 .append(!self.truncate)
                 .write(true)
                 .open(&self.path)?;
+            let file = LineWriter::new(file);
             self.file = Some(file);
         }
         Ok(())
